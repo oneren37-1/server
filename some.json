@@ -1,0 +1,18 @@
+[
+  {
+    "role": "host",
+    "type": "connection",
+    "hostId": "host123",
+    "hostPassword": "password"
+  },
+  {
+    "role": "client",
+    "type": "connection",
+    "hostId": "host123",
+    "hostPassword": "password"
+  },
+  {
+    "role": "client",
+    "data": "Hello World"
+  }
+]
