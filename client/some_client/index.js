@@ -36,6 +36,11 @@ socket.onmessage = function(event) {
             handleAnswer(data.answer)
             break
 
+        case 'iceCandidate':
+            console.log('Ice candidate received')
+            console.log(data.iceCandidate)
+            peerConnection.addIceCandidate(JSON.parse(data.iceCandidate))
+            break
     }
 };
 
@@ -67,6 +72,15 @@ peerConnection.onicecandidate = (event) => {
     if (event.candidate) {
         console.log("New ICE candidate: " + JSON.stringify(peerConnection.localDescription));
 
+        socket.send(JSON.stringify({
+            role: 'client',
+            type: 'iceCandidate',
+            hostID: '123',
+            message: JSON.stringify({
+                type: 'iceCandidate',
+                iceCandidate: event.candidate
+            })
+        }))
     }
 }
 
