@@ -9,6 +9,7 @@ const wss = new WebSocket.Server({ server })
 const hosts = {}
 
 wss.on('connection', function connection(ws) {
+    console.log('A user connected.')
   ws.on('message', (data) => handleMessage(data, ws))
   ws.on('close', () => {
     Object.keys(hosts).forEach((hostID) => {
@@ -27,6 +28,7 @@ server.listen(port, function() {
 })
 
 function handleMessage(message, ws) {
+    console.log(message)
     const data = JSON.parse(message)
 
     switch (data.type) {

@@ -39,7 +39,14 @@ socket.onmessage = function(event) {
         case 'iceCandidate':
             console.log('Ice candidate received')
             console.log(data.iceCandidate)
-            peerConnection.addIceCandidate(JSON.parse(data.iceCandidate))
+            const parsed = JSON.parse(data.iceCandidate)
+            const candidate = new RTCIceCandidate({
+                candidate: parsed.candidate,
+                sdpMid: parsed.sdpMid,
+                sdpMLineIndex: parsed.sdpMLineIndex
+            })
+            console.log(candidate);
+            peerConnection.addIceCandidate(candidate)
             break
     }
 };
@@ -71,6 +78,7 @@ dataChannel.onerror = event => {
 peerConnection.onicecandidate = (event) => {
     if (event.candidate) {
         console.log("New ICE candidate: " + JSON.stringify(peerConnection.localDescription));
+        console.log(event.candidate);
 
         socket.send(JSON.stringify({
             role: 'client',
@@ -78,13 +86,11 @@ peerConnection.onicecandidate = (event) => {
             hostID: '123',
             message: JSON.stringify({
                 type: 'iceCandidate',
-                iceCandidate: event.candidate
+                payload: JSON.stringify(event.candidate)
             })
         }))
     }
 }
-
-
 
 window.dc = dataChannel
 
@@ -101,7 +107,7 @@ async function createOffer() {
                 hostID: '123',
                 message: JSON.stringify({
                     type: 'offer',
-                    offer: offer
+                    payload: JSON.stringify(offer.sdp)
                 })
             }))
         })

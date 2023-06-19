@@ -27,13 +27,13 @@ socket.onmessage = function(event) {
     switch (data.type) {
         case 'offer':
             console.log('Offer received')
-            console.log(data.offer)
-            createRTCConnection(data.offer)
+            console.log(data.payload)
+            createRTCConnection(data.payload)
             break
         case 'iceCandidate':
             console.log('Ice candidate received')
-            console.log(data.iceCandidate)
-            peerConnection.addIceCandidate(JSON.parse(data.iceCandidate))
+            console.log(data.payload)
+            peerConnection.addIceCandidate(JSON.parse(data.payload))
             break
     }
 };
@@ -48,10 +48,6 @@ socket.onerror = function(error) {
 const peerConnection = new RTCPeerConnection();
 let dataChannel;
 
-// peerConnection.onconnectionstatechange = (event) => {
-//     console.log('Connection state change: ' + peerConnection.connectionState)
-// }
-
 peerConnection.onicecandidate = (event) => {
     if (event.candidate) {
         console.log('New ICE candidate' + JSON.stringify(peerConnection.localDescription))
@@ -62,7 +58,7 @@ peerConnection.onicecandidate = (event) => {
             hostID: '123',
             message: JSON.stringify({
                 type: 'iceCandidate',
-                iceCandidate: JSON.stringify(event.candidate)
+                payload: JSON.stringify(event.candidate)
             })
         }))
     }
@@ -82,9 +78,6 @@ peerConnection.addEventListener('datachannel', event => {
 
 
 async function createRTCConnection(offer) {
-
-
-
     await peerConnection.setRemoteDescription(offer)
         .then(async () => {
             // peerConnection.ondatachannel = (event) => {
@@ -110,7 +103,7 @@ async function createRTCConnection(offer) {
                         type: 'answer',
                         message: JSON.stringify({
                             type: 'answer',
-                            answer: JSON.stringify(answer)
+                            payload: JSON.stringify(answer)
                         }),
                     }))
 
