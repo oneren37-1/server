@@ -6,19 +6,27 @@ const port = 6969;
 const server = http.createServer(express);
 const wss = new WebSocket.Server({ server })
 
-const hosts = {}
+let hosts = {}
 
 wss.on('connection', function connection(ws) {
     console.log('A user connected.')
   ws.on('message', (data) => handleMessage(data, ws))
   ws.on('close', () => {
     Object.keys(hosts).forEach((hostID) => {
-      if (hosts[hostID].connection === ws) {
-        hosts[hostID].connection = null
-      }
-      if (hosts[hostID].client === ws) {
-        hosts[hostID].client = null
-      }
+        try {
+            if (hosts[hostID].connection === ws) {
+                hosts[hostID].connection.close();
+                hosts[hostID].client.close()
+                hosts[hostID] = undefined;
+            }
+            else if (hosts[hostID].client === ws) {
+                hosts[hostID].client.close()
+                hosts[hostID].client = null
+            }
+        }
+        catch (e) {
+            console.log(e)
+        }
     })
   });
 })
@@ -29,18 +37,24 @@ server.listen(port, function() {
 
 function handleMessage(message, ws) {
     console.log(message)
-    const data = JSON.parse(message)
+    try {
+        const data = JSON.parse(message)
 
-    switch (data.type) {
-        case 'connection':
-            handleConnect(data, ws)
-            break
-        default:
-            handleForward(data, ws)
+        switch (data.type) {
+            case 'connection':
+                handleConnect(data, ws)
+                break
+            default:
+                handleForward(data, ws)
+        }
+    }
+    catch (e) {
+        console.log(e)
     }
 }
 
 function handleConnect(data, ws) {
+    console.log('handle connect')
     switch (data.role) {
     case 'host':
         if (!hosts[data.hostID]) {
@@ -74,13 +88,15 @@ function handleConnect(data, ws) {
             }))
             return;
         }
+        console.log('send expired at ' + new Date().getMilliseconds());
         host.client && host.client.send(JSON.stringify({
             type: 'expired'
         }))
         host.client = ws
         ws.send(JSON.stringify({
             type: 'info',
-            message: 'Client connected'
+            message: 'Client connected',
+            requestId: data.message.requestId
         }))
         break
     }
@@ -107,6 +123,7 @@ function handleForward(data, ws) {
                 }))
                 return;
             }
+            if (typeof data.message !== 'string') data.message = JSON.stringify(data.message)
             hosts[data.hostID].connection && hosts[data.hostID].connection.send(data.message)
             break
     }

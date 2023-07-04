@@ -22,32 +22,37 @@ socket.onclose = function(event) {
 };
 
 socket.onmessage = function(event) {
-    console.log("Получены данные ws " + event.data);
-    const data = JSON.parse(event.data)
-    switch (data.type) {
-        case 'info':
-            if (data.message = 'Client connected') {
-                createOffer()
-            }
-            break
-        case 'answer':
-            console.log('Answer received')
-            console.log(data.answer)
-            handleAnswer(data.answer)
-            break
+    try {
+        console.log("Получены данные ws " + event.data);
+        const data = JSON.parse(event.data)
+        switch (data.type) {
+            case 'info':
+                if (data.message = 'Client connected') {
+                    createOffer()
+                }
+                break
+            case 'answer':
+                console.log('Answer received')
+                console.log(data.answer)
+                handleAnswer(data.answer)
+                break
 
-        case 'iceCandidate':
-            console.log('Ice candidate received')
-            console.log(data.iceCandidate)
-            const parsed = JSON.parse(data.iceCandidate)
-            const candidate = new RTCIceCandidate({
-                candidate: parsed.candidate,
-                sdpMid: parsed.sdpMid,
-                sdpMLineIndex: parsed.sdpMLineIndex
-            })
-            console.log(candidate);
-            peerConnection.addIceCandidate(candidate)
-            break
+            case 'iceCandidate':
+                console.log('Ice candidate received')
+                console.log(data.iceCandidate)
+                const parsed = JSON.parse(data.iceCandidate)
+                const candidate = new RTCIceCandidate({
+                    candidate: parsed.candidate,
+                    sdpMid: parsed.sdpMid,
+                    sdpMLineIndex: parsed.sdpMLineIndex
+                })
+                console.log(candidate);
+                peerConnection.addIceCandidate(candidate)
+                break
+        }
+    }
+    catch (e) {
+        console.log(e)
     }
 };
 
