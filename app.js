@@ -42,7 +42,6 @@ function handleConnection(ws) {
 wss.on('connection', handleConnection)
 
 server.listen(port, function() { console.log(`Server is listening on ${port}!`) })
-sslServer.listen(port, function() { console.log(`Server is listening on ${port}!`) })
 
 function handleMessage(message, ws) {
     console.log(message)
