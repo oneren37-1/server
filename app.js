@@ -1,52 +1,46 @@
 const express = require('express');
-const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const WebSocket = require('ws');
 
 const options = {
-    ca: fs.readFileSync('./ssl/ca_bundle.crt'),
-    cert: fs.readFileSync('./ssl/certificate.crt'),
-    key: fs.readFileSync('./ssl/private.key')
+    ca: fs.readFileSync('./185.143.179.130/ca_bundle.crt'),
+    cert: fs.readFileSync('./185.143.179.130/certificate.crt'),
+    key: fs.readFileSync('./185.143.179.130/private.key')
 };
 
 const port = 6969;
-const server = http.createServer(express);
-const sslServer = https.createServer(express);
-
-const ws = new WebSocket.Server({ server })
-const wss = new WebSocket.Server({ sslServer })
+const server = https.createServer(express);
+const wss = new WebSocket.Server({ server })
 
 let hosts = {}
 
-function handleConnection(ws) {
+wss.on('connection', function connection(ws) {
     console.log('A user connected.')
-    ws.on('message', (data) => handleMessage(data, ws))
-    ws.on('close', () => {
-        Object.keys(hosts).forEach((hostID) => {
-            try {
-                if (hosts[hostID].connection === ws) {
-                    hosts[hostID].connection.close();
-                    hosts[hostID].client.close()
-                    hosts[hostID] = undefined;
-                }
-                else if (hosts[hostID].client === ws) {
-                    hosts[hostID].client.close()
-                    hosts[hostID].client = null
-                }
+  ws.on('message', (data) => handleMessage(data, ws))
+  ws.on('close', () => {
+    Object.keys(hosts).forEach((hostID) => {
+        try {
+            if (hosts[hostID].connection === ws) {
+                hosts[hostID].connection.close();
+                hosts[hostID].client.close()
+                hosts[hostID] = undefined;
             }
-            catch (e) {
-                console.log(e)
+            else if (hosts[hostID].client === ws) {
+                hosts[hostID].client.close()
+                hosts[hostID].client = null
             }
-        })
-    });
-}
+        }
+        catch (e) {
+            console.log(e)
+        }
+    })
+  });
+})
 
-ws.on('connection', handleConnection)
-wss.on('connection', handleConnection)
-
-server.listen(port, function() { console.log(`Server is listening on ${port}!`) })
-sslServer.listen(port, function() { console.log(`Server is listening on ${port}!`) })
+server.listen(port, function() {
+  console.log(`Server is listening on ${port}!`)
+})
 
 function handleMessage(message, ws) {
     console.log(message)
