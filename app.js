@@ -8,8 +8,12 @@ const wss = new WebSocket.Server({ server })
 
 let hosts = {}
 
+function log(message) {
+    console.log(Date.now() + ': ' + message)
+}
+
 wss.on('connection', function connection(ws) {
-    console.log('A user connected.')
+  log('Someone connected')
   ws.on('message', (data) => handleMessage(data, ws))
   ws.on('close', () => {
     Object.keys(hosts).forEach((hostID) => {
@@ -18,10 +22,12 @@ wss.on('connection', function connection(ws) {
                 hosts[hostID].connection.close();
                 hosts[hostID].client.close()
                 hosts[hostID] = undefined;
+                log(`host ${hostID} disconnected`);
             }
             else if (hosts[hostID].client === ws) {
                 hosts[hostID].client.close()
                 hosts[hostID].client = null
+                log(`client of ${hostID} disconnected`);
             }
         }
         catch (e) {
@@ -36,7 +42,7 @@ server.listen(port, function() {
 })
 
 function handleMessage(message, ws) {
-    console.log(message)
+    log(message.toString('utf-8'))
     try {
         const data = JSON.parse(message)
 
