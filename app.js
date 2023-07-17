@@ -9,7 +9,7 @@ const wss = new WebSocket.Server({ server })
 let hosts = {}
 
 function log(message) {
-    console.log(Date.now() + ': ' + message)
+    console.log(new Date().toLocaleString() + ': ' + message)
 }
 
 wss.on('connection', function connection(ws) {
