@@ -72,6 +72,7 @@ function handleConnect(data, ws) {
             }
         } else {
             hosts[data.hostID].connection = ws
+            hosts[data.hostID].hostPassword = data.hostPassword
         }
         ws.send(JSON.stringify({
             type: 'info',
